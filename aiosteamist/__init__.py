@@ -9,7 +9,7 @@ import aiohttp
 import xmltodict  # type: ignore
 
 import asyncio
-from discovery30303 import Device30303, AIODiscovery30303
+from discovery30303 import Device30303, AIODiscovery30303, MODEL_550, MODEL_450
 
 __author__ = """J. Nick Koston"""
 __email__ = "nick@koston.org"
@@ -84,11 +84,16 @@ class Steamist:
         raise NotImplementedError("Sub class should implement")
 
     @staticmethod
+    def model() -> str:
+        """Return the model string returned by device"""
+        raise NotImplementedError("Must be overriden by subclass")
+
+    @staticmethod
     def create_steamist_from(
         host: str, model: str, websession: Callable[[None], aiohttp.ClientSession]
     ) -> Steamist:
         """Based on model, instantiate the proper implementation"""
-        if model == "STM 550":
+        if model == SteamistModel550.model():
             return SteamistModel550(host)
         else:
             return SteamistModel450(host, websession())
@@ -104,6 +109,11 @@ class SteamistModel550(Steamist):
         await task
         if len(scanner.found_devices) > 0:
             return SteamistStatus.create_from_device_30303(scanner.found_devices[0])
+
+    @staticmethod
+    def model() -> str:
+        """Return the model string returned by device"""
+        return MODEL_550
 
 
 class SteamistModel450(Steamist):
@@ -169,3 +179,8 @@ class SteamistModel450(Steamist):
     async def async_set_led(self, id: int) -> None:
         """Call to set a led value."""
         await self._get(SET_ENDPOINT, {"led": id})
+
+    @staticmethod
+    def model() -> str:
+        """Return the model string returned by device"""
+        return MODEL_450
