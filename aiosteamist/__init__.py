@@ -90,7 +90,7 @@ class Steamist:
 
     @staticmethod
     def create_steamist_from(
-        host: str, model: str, websession: Callable[[None], aiohttp.ClientSession]
+        host: str, model: str, websession: Callable[[], aiohttp.ClientSession]
     ) -> Steamist:
         """Based on model, instantiate the proper implementation"""
         if model == SteamistModel550.model():
